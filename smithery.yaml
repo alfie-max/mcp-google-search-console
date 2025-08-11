@@ -1,0 +1,21 @@
+# Smithery configuration file: https://smithery.ai/docs/build/project-config
+
+startCommand:
+  type: stdio
+  commandFunction:
+    # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
+    |-
+    (config) => ({ command: 'node', args: ['src/index.js'], env: { GOOGLE_CREDENTIALS: config.GOOGLE_CREDENTIALS } })
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    required:
+      - GOOGLE_CREDENTIALS
+    properties:
+      GOOGLE_CREDENTIALS:
+        type: string
+        description: JSON string containing the complete Google service account credentials
+  exampleConfig:
+    GOOGLE_CREDENTIALS: '{"type":"service_account","project_id":"my-project-id","private_key":"-----BEGIN
+      PRIVATE KEY-----\\n...\\n-----END PRIVATE
+      KEY-----\n","client_email":"service-account@my-project-id.iam.gserviceaccount.com"}'
