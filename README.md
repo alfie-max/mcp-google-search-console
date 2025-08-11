@@ -1,4 +1,5 @@
 # Google Search Console MCP Server
+[![smithery badge](https://smithery.ai/badge/@alfie-max/mcp-google-search-console)](https://smithery.ai/install/@alfie-max/mcp-google-search-console)
 
 A Model Context Protocol (MCP) server that provides tools for interacting with Google Search Console API. This server enables Claude Desktop and other MCP clients to query search performance data, inspect URLs, manage sitemaps, and analyze SEO metrics.
 
@@ -42,6 +43,14 @@ A Model Context Protocol (MCP) server that provides tools for interacting with G
 3. Node.js 18+ installed
 
 ## Setup
+
+### Installing via Smithery
+
+To install mcp-google-search-console for Claude Desktop automatically via [Smithery](https://smithery.ai/install/@alfie-max/mcp-google-search-console):
+
+```bash
+npx -y @smithery/cli install @alfie-max/mcp-google-search-console --client claude
+```
 
 ### 1. Create a Google Cloud Service Account
 
