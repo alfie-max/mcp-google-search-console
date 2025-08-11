@@ -1,0 +1,49 @@
+{
+  "name": "google-search-console-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Google Search Console API - Query search performance, inspect URLs, manage sitemaps, and analyze SEO metrics",
+  "author": "",
+  "license": "ISC",
+  "runtime": "node",
+  "main": "src/index.js",
+  "tools": [
+    {
+      "name": "search_analytics",
+      "description": "Query search performance data including impressions, clicks, CTR, and position"
+    },
+    {
+      "name": "list_sites",
+      "description": "List all Search Console properties the service account has access to"
+    },
+    {
+      "name": "url_inspection",
+      "description": "Inspect a specific URL to get indexing and crawling information"
+    },
+    {
+      "name": "sitemaps",
+      "description": "List all sitemaps or get information about a specific sitemap"
+    },
+    {
+      "name": "quick_insights",
+      "description": "Get pre-configured reports for common Search Console insights"
+    },
+    {
+      "name": "index_coverage",
+      "description": "Get index coverage data and issues for your property"
+    },
+    {
+      "name": "list_tools",
+      "description": "Get a list of all available Search Console tools and their descriptions"
+    }
+  ],
+  "config": {
+    "type": "object",
+    "properties": {
+      "GOOGLE_CREDENTIALS": {
+        "type": "string",
+        "description": "JSON string containing the complete Google service account credentials",
+        "required": true
+      }
+    }
+  }
+}

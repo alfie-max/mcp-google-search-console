@@ -1,0 +1,40 @@
+{
+  "name": "google-search-console-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Google Search Console API",
+  "main": "src/index.js",
+  "bin": {
+    "google-search-console-mcp": "src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node test-connection.js"
+  },
+  "keywords": ["mcp", "google", "search-console", "seo"],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@googleapis/searchconsole": "^4.0.0",
+    "@modelcontextprotocol/sdk": "^1.16.0",
+    "dotenv": "^16.4.5",
+    "google-auth-library": "^9.14.0",
+    "zod": "^3.25.76"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "mcp": {
+    "config": {
+      "type": "object",
+      "properties": {
+        "GOOGLE_CREDENTIALS": {
+          "type": "string",
+          "description": "JSON string containing the complete Google service account credentials",
+          "title": "Google Service Account Credentials (JSON)"
+        }
+      },
+      "required": ["GOOGLE_CREDENTIALS"]
+    }
+  }
+}
