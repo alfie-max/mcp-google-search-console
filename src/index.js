@@ -38,13 +38,20 @@ async function executeWithErrorHandling(fn, siteUrl) {
           text: JSON.stringify({
             error: 'Permission denied for this Search Console property',
             siteUrl: siteUrl,
-            solution: `Please grant access to the service account: ${serviceAccountEmail}`,
+            serviceAccountEmail: serviceAccountEmail,
+            solution: `The service account needs access to this Search Console property`,
+            instructions: 'Follow these steps to grant access:',
             steps: [
-              '1. Go to Google Search Console (search.google.com/search-console)',
-              '2. Select your property',
-              '3. Go to Settings > Users and permissions',
-              `4. Add ${serviceAccountEmail} with at least "Restricted" access`,
-              '5. Try the query again'
+              '1. Go to Google Search Console (https://search.google.com/search-console)',
+              `2. Select the property: ${siteUrl}`,
+              '3. Click Settings (⚙️) in the left sidebar',
+              '4. Click "Users and permissions"',
+              '5. Click "Add user" button',
+              `6. Enter this email: ${serviceAccountEmail}`,
+              '7. Select permission level: "Restricted" (sufficient for read access)',
+              '8. Click "Add"',
+              '9. Wait 5-10 minutes for permissions to propagate',
+              '10. Try your query again'
             ],
             originalError: error.message
           }, null, 2)
