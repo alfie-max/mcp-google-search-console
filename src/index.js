@@ -30,6 +30,7 @@ async function executeWithErrorHandling(fn, siteUrl) {
   try {
     return await fn();
   } catch (error) {
+
     // Handle permission errors specifically
     if (error.code === 403 || error.message?.includes('permission') || error.message?.includes('forbidden')) {
       return {
@@ -40,8 +41,14 @@ async function executeWithErrorHandling(fn, siteUrl) {
             siteUrl: siteUrl,
             serviceAccountEmail: serviceAccountEmail,
             solution: `The service account needs access to this Search Console property`,
-            instructions: 'Follow these steps to grant access:',
+            possibleCauses: [
+              'The property exists but the service account has no access',
+              'The property has not been added to Search Console yet',
+              'The property URL format is incorrect'
+            ],
+            instructions: 'Follow these steps to resolve:',
             steps: [
+              'OPTION A: If the property already exists in Search Console:',
               '1. Go to Google Search Console (https://search.google.com/search-console)',
               `2. Select the property: ${siteUrl}`,
               '3. Click Settings (⚙️) in the left sidebar',
@@ -50,9 +57,44 @@ async function executeWithErrorHandling(fn, siteUrl) {
               `6. Enter this email: ${serviceAccountEmail}`,
               '7. Select permission level: "Restricted" (sufficient for read access)',
               '8. Click "Add"',
-              '9. Wait 5-10 minutes for permissions to propagate',
-              '10. Try your query again'
+              '',
+              'OPTION B: If the property does not exist in Search Console:',
+              '1. Go to Google Search Console (https://search.google.com/search-console)',
+              '2. Click "Add property" button',
+              `3. Enter your website URL: ${siteUrl}`,
+              '4. Choose property type (URL-prefix or Domain)',
+              '5. Click "Continue" and verify ownership',
+              '6. After verification, follow Option A steps above',
+              '',
+              'Then wait 5-10 minutes for permissions to propagate and try again'
             ],
+            originalError: error.message
+          }, null, 2)
+        }]
+      };
+    }
+
+    // Handle rate limiting errors
+    if (error.code === 429 || error.message?.includes('quota') || error.message?.includes('rate limit')) {
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            error: 'Search Console API rate limit exceeded',
+            siteUrl: siteUrl,
+            solution: 'You have exceeded the API quota limits',
+            instructions: 'Try these solutions:',
+            steps: [
+              '1. Wait a few minutes before trying again',
+              '2. Reduce the frequency of your queries',
+              '3. Use smaller date ranges or fewer dimensions',
+              '4. Check API quotas in Google Cloud Console'
+            ],
+            quotaLimits: {
+              'Queries per minute': '1,200',
+              'Queries per 100 seconds per user': '100',
+              'Daily queries': 'Varies by project'
+            },
             originalError: error.message
           }, null, 2)
         }]
