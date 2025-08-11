@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { searchconsole } from '@googleapis/searchconsole';
 import { GoogleAuth } from 'google-auth-library';
 import dotenv from 'dotenv';
 
@@ -62,19 +61,20 @@ async function testConnection() {
       scopes: ['https://www.googleapis.com/auth/webmasters.readonly', 'https://www.googleapis.com/auth/webmasters']
     });
 
-    // Initialize Search Console client
-    const searchConsoleClient = searchconsole({
-      version: 'v1',
-      auth: auth
-    });
+    // Get auth client for direct API calls
+    const authClient = await auth.getClient();
 
-    print('✅ Search Console client initialized', colors.green);
+    print('✅ Search Console auth client initialized', colors.green);
 
     // Test 1: List all accessible sites
     printSection('Test 1: List Sites');
     
     try {
-      const sitesResponse = await searchConsoleClient.sites.list();
+      // Use direct API call instead of client wrapper
+      const authClient = await auth.getClient();
+      const sitesResponse = await authClient.request({
+        url: 'https://searchconsole.googleapis.com/webmasters/v3/sites',
+      });
       const sites = sitesResponse.data.siteEntry || [];
       
       if (sites.length === 0) {
@@ -99,9 +99,10 @@ async function testConnection() {
         const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
         try {
-          const analyticsResponse = await searchConsoleClient.searchanalytics.query({
-            siteUrl: testSiteUrl,
-            requestBody: {
+          const analyticsResponse = await authClient.request({
+            url: `https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(testSiteUrl)}/searchAnalytics/query`,
+            method: 'POST',
+            data: {
               startDate: startDate,
               endDate: endDate,
               dimensions: ['query'],
@@ -128,8 +129,10 @@ async function testConnection() {
         // Check if it's a URL-prefix property (not domain property)
         if (!testSiteUrl.startsWith('sc-domain:')) {
           try {
-            const inspectionResponse = await searchConsoleClient.urlInspection.index.inspect({
-              requestBody: {
+            const inspectionResponse = await authClient.request({
+              url: 'https://searchconsole.googleapis.com/webmasters/v1/urlInspection/index:inspect',
+              method: 'POST',
+              data: {
                 siteUrl: testSiteUrl,
                 inspectionUrl: testSiteUrl.replace(/\/$/, ''), // Remove trailing slash
                 languageCode: 'en'
@@ -154,8 +157,8 @@ async function testConnection() {
         printSection('Test 4: Sitemaps');
         
         try {
-          const sitemapsResponse = await searchConsoleClient.sitemaps.list({
-            siteUrl: testSiteUrl
+          const sitemapsResponse = await authClient.request({
+            url: `https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(testSiteUrl)}/sitemaps`
           });
 
           const sitemaps = sitemapsResponse.data.sitemap || [];

@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { searchconsole } from '@googleapis/searchconsole';
 import { GoogleAuth } from 'google-auth-library';
 import { z } from 'zod';
 import dotenv from 'dotenv';
@@ -18,11 +17,8 @@ const auth = new GoogleAuth({
   scopes: ['https://www.googleapis.com/auth/webmasters.readonly', 'https://www.googleapis.com/auth/webmasters']
 });
 
-// Initialize Search Console client
-const searchConsoleClient = searchconsole({
-  version: 'v1',
-  auth: auth
-});
+// Get auth client for direct API calls
+const authClient = await auth.getClient();
 
 const server = new McpServer({
   name: 'google-search-console-mcp',
@@ -108,9 +104,10 @@ server.registerTool('search_analytics', {
   }
 
   return executeWithErrorHandling(async () => {
-    const response = await searchConsoleClient.searchanalytics.query({
-      siteUrl: siteUrl,
-      requestBody: {
+    const response = await authClient.request({
+      url: `https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`,
+      method: 'POST',
+      data: {
         startDate: startDate,
         endDate: endDate,
         dimensions: dimensions,
@@ -138,7 +135,9 @@ server.registerTool('list_sites', {
   inputSchema: {}
 }, async () => {
   return executeWithErrorHandling(async () => {
-    const response = await searchConsoleClient.sites.list();
+    const response = await authClient.request({
+      url: 'https://searchconsole.googleapis.com/webmasters/v3/sites'
+    });
     
     return {
       content: [{
@@ -219,10 +218,9 @@ server.registerTool('sitemaps', {
 
   return executeWithErrorHandling(async () => {
     if (action === 'get' && sitemapPath) {
-      const response = await searchConsoleClient.sitemaps.get({
-        siteUrl: siteUrl,
-        feedpath: sitemapPath
-      });
+      const response = await authClient.request({
+      url: `https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/sitemaps/${encodeURIComponent(sitemapPath)}`
+    });
       
       return {
         content: [{
@@ -231,9 +229,9 @@ server.registerTool('sitemaps', {
         }]
       };
     } else {
-      const response = await searchConsoleClient.sitemaps.list({
-        siteUrl: siteUrl
-      });
+      const response = await authClient.request({
+      url: `https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/sitemaps`
+    });
       
       return {
         content: [{
@@ -330,9 +328,10 @@ server.registerTool('quick_insights', {
   const reportConfig = reports[reportType];
 
   return executeWithErrorHandling(async () => {
-    const response = await searchConsoleClient.searchanalytics.query({
-      siteUrl: siteUrl,
-      requestBody: {
+    const response = await authClient.request({
+      url: `https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`,
+      method: 'POST',
+      data: {
         startDate: startDate,
         endDate: endDate,
         dimensions: reportConfig.dimensions,
@@ -397,9 +396,10 @@ server.registerTool('index_coverage', {
   }
 
   return executeWithErrorHandling(async () => {
-    const response = await searchConsoleClient.searchanalytics.query({
-      siteUrl: siteUrl,
-      requestBody: {
+    const response = await authClient.request({
+      url: `https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`,
+      method: 'POST',
+      data: {
         startDate: startDate,
         endDate: endDate,
         dimensions: dimensions || ['coverageState'],
